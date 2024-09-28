@@ -2,6 +2,13 @@ import React, { useState, useEffect } from "react";
 
 function PriceEntryForm() {
   const [date, setDate] = useState("");
+  const [itemName, setItemName] = useState("Chicken thighs");
+  const [store, setStore] = useState("Commissary");
+  const [brand, setBrand] = useState("Store");
+  const [isOnSale, setIsOnSale] = useState(false);
+  const [price, setPrice] = useState("2.89");
+
+  const [response, setResponse] = useState("");
 
   // Get today's date in YYYY-MM-DD format
   useEffect(() => {
@@ -12,11 +19,34 @@ function PriceEntryForm() {
     setDate(`${yyyy}-${mm}-${dd}`);
   }, []);
 
-  const [itemName, setItemName] = useState("");
-  const [store, setStore] = useState("");
-  const [brand, setBrand] = useState("");
-  const [isOnSale, setIsOnSale] = useState(false);
-  const [price, setPrice] = useState("");
+  const handleClick = async () => {
+    const data = {
+      date: date,
+      itemName: itemName,
+      store: store,
+      brand: brand,
+      isOnSale: isOnSale,
+      price: price,
+    };
+
+    try {
+      console.log("[CLIENT:POST] /add_price");
+
+      const response = await fetch("/add_price", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      setResponse(result.message);
+    } catch (error) {
+      setResponse("ERROR");
+      console.error("Error fetching the status:", error);
+    }
+  };
 
   return (
     <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg">
@@ -151,10 +181,13 @@ function PriceEntryForm() {
       {/* Submit Button */}
       <button
         type="submit"
+        onClick={() => handleClick()}
         className="w-full p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         Submit
       </button>
+
+      <span>{response}</span>
     </div>
   );
 }
